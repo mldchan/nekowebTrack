@@ -1,0 +1,6 @@
+.venv/
+.idea/
+nekoweb.db
+nekoweb.log
+test.ipynb
+dump.json
