@@ -1,9 +1,9 @@
 import asyncio
 import datetime
-import json
 import logging
-import aiohttp
 import sqlite3
+
+import aiohttp
 
 db = sqlite3.connect('nekoweb.db')
 
