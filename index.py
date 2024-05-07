@@ -13,10 +13,12 @@ logger = logging.Logger(__name__)
 logger.setLevel(logging.DEBUG)
 logger_console = logging.StreamHandler()
 logger_console.setLevel(logging.DEBUG)
+logger_console.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
 logger.addHandler(logger_console)
 
 logger_file = logging.FileHandler('nekoweb.log')
 logger_file.setLevel(logging.DEBUG)
+logger_file.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s | %(message)s'))
 logger.addHandler(logger_file)
 
 
