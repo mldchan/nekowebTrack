@@ -33,27 +33,30 @@ async def send_to_discord(webhook, views, last_visits):
                 {
                     "title": "Nekoweb Tracker",
                     "description": f"The visitor counter has been updated!",
-                    "color": "#00ff00",
+                    "color": 0x7FD5EA,
                     "fields": [
                         {
                             "name": "Views",
-                            "value": f"From {last_visits} to {views}!",
-                            "inline": True
+                            "value": f"From {last_visits} to {views}!"
                         },
                         {
                             "name": "Difference",
-                            "value": f"{views - last_visits}",
-                            "inline": True
+                            "value": f"{views - last_visits}"
                         }
                     ],
                     "footer": {
-                        "text": "Nekoweb Tracker",
-                        "icon_url": "https://nekoweb.org/favicon.ico"
+                        "text": "Nekoweb Tracker"
                     }
                 }
             ]
-        }):
-            logger.debug('Discord webhook sent')
+        }) as req:
+            if req.status == 204:
+                logger.debug('Discord webhook sent')
+            else:
+                logger.error('Failed to send Discord webhook')
+                
+                reason = await req.text()
+                logger.error('Discord webhook failed with status %s: %s' % (req.status, reason))
 
 
 async def main():
