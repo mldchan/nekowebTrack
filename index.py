@@ -22,7 +22,12 @@ logger_file.setFormatter(logging.Formatter('%(asctime)s | %(levelname)s | %(mess
 logger.addHandler(logger_file)
 
 async def send_to_discord(webhook, views, last_visits):
+    if views == last_visits:
+        logger.debug('Views are the same, skipping Discord webhook')
+        return
+    logger.debug('Sending to Discord webhook')
     async with aiohttp.ClientSession() as session:
+        logger.debug('Posting to Discord webhook')
         async with session.post(webhook, json={
             "embeds": [
                 {
@@ -48,7 +53,7 @@ async def send_to_discord(webhook, views, last_visits):
                 }
             ]
         }):
-            pass
+            logger.debug('Discord webhook sent')
 
 
 async def main():
@@ -80,7 +85,10 @@ async def main():
                 
                 # Send to Discord webhook
                 if config["webhook"] is not None:
+                    logger.debug('Sending to Discord webhook')
                     await send_to_discord(config["webhook"], out["views"], last_visits)
+                else:
+                    logger.debug('No webhook provided in config.json, skipping...')
                 
                 logger.debug('Finished.')
 
