@@ -7,6 +7,8 @@ import sqlite3
 
 import aiohttp
 
+if not os.path.exists('data'):
+    os.makedirs('data')
 db = sqlite3.connect('data/nekoweb.db')
 
 logger = logging.Logger(__name__)
