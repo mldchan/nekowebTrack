@@ -87,6 +87,7 @@ async def main():
                 cur = db.cursor()
                 cur.execute("create table if not exists viewshistory(date text, views int);")
                 cur.execute('create table if not exists updatehistory(date text, last_update_date text);')
+                cur.execute('create table if not exists senthistory(date text, type text);')
 
                 # Get last visits
                 cur.execute("select * from viewshistory order by date desc limit 1")
@@ -102,13 +103,6 @@ async def main():
 
                 logger.debug('Commiting to the database')
                 db.commit()
-
-                # Send to Discord webhook
-                if config["webhook"] is not None:
-                    logger.debug('Sending to Discord webhook')
-                    await send_views_to_discord(config["webhook"], out["views"], last_visits)
-                else:
-                    logger.debug('No webhook provided in config.json, skipping...')
 
                 # Check if there was an update using updated_at (int milliseconds unix timestamp)
                 if out["updated_at"] is not None:
@@ -127,7 +121,22 @@ async def main():
                                 (str(datetime.datetime.now()), out["updated_at"]))
                     db.commit()
 
-                logger.debug('Finished.')
+                # Check if there were any views
+                cur.execute("select * from viewshistory order by date desc limit 1")
+                last_view = cur.fetchone()
+                if last_view is not None:
+                    cur.execute("select * from senthistory where type = 'views' order by date desc limit 1")
+                    last_sent = cur.fetchone()
+                    if last_sent is None or last_sent[0] != str(datetime.date.today()):
+                        logger.debug('Sending to Discord webhook')
+                        await send_views_to_discord(config["webhook"], out["views"], last_view[1])
+                        cur.execute('insert into senthistory(date, type) values (?, ?)',
+                                    (str(datetime.date.today()), 'views'))
+                        db.commit()
+                    else:
+                        logger.debug('No views found')
+                else:
+                    logger.debug('No views found')
 
 
 if __name__ == '__main__':
